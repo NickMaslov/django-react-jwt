@@ -55,6 +55,8 @@ export const AuthProvider = ({ children }) => {
 
     let updateToken = useCallback(
         async (e) => {
+            console.log('Updated Token!');
+
             let response = await fetch(
                 'http://127.0.0.1:8000/api/token/refresh/',
                 {
@@ -63,7 +65,7 @@ export const AuthProvider = ({ children }) => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        refresh: authTokens.refresh,
+                        refresh: authTokens?.refresh,
                     }),
                 }
             );
@@ -77,18 +79,24 @@ export const AuthProvider = ({ children }) => {
             } else {
                 logoutUser();
             }
+
+            loading && setLoading(false);
         },
-        [authTokens, logoutUser, navigate]
+        [authTokens, logoutUser, navigate, loading]
     );
 
     let contextData = {
         loginUser,
         logoutUser,
         user,
+        authTokens,
     };
 
     useEffect(() => {
-        console.log('Update token called');
+        if (loading) {
+            updateToken();
+        }
+
         let fourMinutes = 1000 * 60 * 4;
         let interval = setInterval(() => {
             if (authTokens) {
